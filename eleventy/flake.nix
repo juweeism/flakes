@@ -10,11 +10,25 @@
     flake-utils.lib.eachDefaultSystem ( system:
         let 
             pkgs = import nixpkgs { inherit system; };
-        in with pkgs; {
-            devShells.default = mkShell {
+
+            eleventy = pkgs.writeShellApplication {
+                name = "eleventy";
+                runtimeInputs = [ pkgs.nodejs_21 ];
+                text = ''
+                    # serve the directory in port 8080
+                    npx @11ty/eleventy --serve --port=3030
+                '';
+            };
+        in {
+            devShells.default = with pkgs; mkShell {
                 buildInputs = [
                     nodejs_21
                 ];
+            };
+            
+            apps.default = {
+                type = "app";
+                program = "${eleventy}/bin/eleventy";
             };
         }
     );
